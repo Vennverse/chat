@@ -5,52 +5,46 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://unpkg.com/moralis/dist/moralis.js"></script>   
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body {
-  font-family: Arial;
-  color: rgb(0, 0, 0);
-}
-
-.split {
-  height: 100%;
-  width: 50%;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  overflow-x: hidden;
-  padding-top: 20px;
-}
-
-.left {
-  left: 0;
-  background-color: rgb(255, 255, 255);
-}
-
-.right {
-  right: 0;
- 
-}
-
-.centered {
-  position: absolute;
-  top: 50%;
-  left: 30%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  background: linear-gradient(to bottom right, #66ff66 0%, #ffffcc 100%);
-}
-
-.centered img {
-  width: 150px;
-  border-radius: 50%;
-}
-</style>
 </head>
 <body>
+  
+<style>
+  body {
+     font-family: Arial;
+     color: rgb(0, 0, 0);
+  }
+  h1{
+     padding:40px;
+  }
+  .left,.right {
+     height: 100%;
+     width: 50%;
+     position: fixed;
+     z-index: 1;
+     top: 0;
+     overflow-x: hidden;
+     padding-top: 20px;
+  }
+  .left {
+    width: 40%;
+     left: 0;
+     background-color: rgb(154, 223, 255);
+  }
+  .right {
+     right: 0;
+     width: 70%;
+     background-color: rgb(194, 236, 243);
+  }
+  
+  .centered img {
+     width: 150px;
+     border-radius: 50%;
+  }
+</style>
+<body>
 
-<div class="split left">
-  <div class="centered">
-    <button id="btn-login">Moralis Login</button>
+<div class="left">
+    <button id="btn-login">Login</button>
     <button id="btn-logout">Logout</button>
 
     <br>
@@ -72,8 +66,8 @@ body {
 
     <script>
       // connect to Moralis server
-      Moralis.initialize("wsbYYkbHVHFT8JOOAg3xpv9QU2m1LbO5MO660wG8");
-      Moralis.serverURL = "https://gurlquv6hbfh.usemoralis.com:2053/server";
+      Moralis.initialize("OuQpicxZBANy7L8tNuz9MEeSFVdJWKKQ3zIbOf8H");
+      Moralis.serverURL = "https://8vatlwj1fnlg.usemoralis.com:2053/server";
 
       // add from here down
       async function login() {
@@ -127,8 +121,8 @@ body {
   </div>
 </div>
 
-<div class="split right">
-  <div class="centered">
+<div class="right">
+
     <p>CHAT</p>
 
  <div id="chatHistory">
@@ -140,9 +134,7 @@ body {
 
  <script>
    // connect to Moralis server
-   Moralis.initialize("wsbYYkbHVHFT8JOOAg3xpv9QU2m1LbO5MO660wG8");
-   Moralis.serverURL = "https://gurlquv6hbfh.usemoralis.com:2053/server";
-
+   
    const queryString = window.location.search;
    const params = new URLSearchParams(queryString);
    const chatId = params.get('id')
