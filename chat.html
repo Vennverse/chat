@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+ 
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: Arial;
+  color: rgb(0, 0, 0);
+}
+
+.split {
+  height: 100%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.left {
+  left: 0;
+  background-color: rgb(255, 255, 255);
+}
+
+.right {
+  right: 0;
+ 
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background: linear-gradient(to bottom right, #66ff66 0%, #ffffcc 100%);
+}
+
+.centered img {
+  width: 150px;
+  border-radius: 50%;
+}
+</style>
+</head>
+<body>
+
+<div class="split left">
+  <div class="centered">
+    <button id="btn-login">Moralis Login</button>
+    <button id="btn-logout">Logout</button>
+
+    <br>
+
+    <hr/>
+    <p>Create new group chat: </p>
+    <input type="text" placeholder="Group name" id="group-name-text"/>
+    <input type="button" value="Create" id="btn-new-group-chat"/>
+    <hr/>
+
+    <br>
+
+    <p>Join group chat</p>
+    <div id="chatRooms">
+      <ul id="roomList"></ul>
+    </div>
+
+    <hr/>
+
+    <script>
+      // connect to Moralis server
+      Moralis.initialize("wsbYYkbHVHFT8JOOAg3xpv9QU2m1LbO5MO660wG8");
+      Moralis.serverURL = "https://gurlquv6hbfh.usemoralis.com:2053/server";
+
+      // add from here down
+      async function login() {
+        let user = Moralis.User.current();
+        if (!user) {
+          user = await Moralis.Web3.authenticate();
+        }
+        console.log("logged in user:", user);
+      }
+
+      async function logOut() {
+        await Moralis.User.logOut();
+        console.log("logged out");
+      }
+
+      async function newGroupChat(){
+        let chatTitle = document.getElementById("group-name-text").value;
+        const Chats = Moralis.Object.extend("Chats");
+        const chat = new Chats();
+        chat.set("title", chatTitle);
+        chat.save();
+
+        console.log("created chat with title " + chatTitle);
+      }
+
+      async function getGroupChats(){
+        const Chats = Moralis.Object.extend("Chats");
+        const query = new Moralis.Query(Chats);
+        const results = await query.find();
+
+        const roomList = document.getElementById("roomList");
+
+        for (let i = 0; i < results.length; i++) {
+          const object = results[i];
+          console.log(object.get('title'));
+          var listItem = document.createElement('li');
+          listItem.innerHTML = "<a href='?id="+object.id+"'>"+object.get('title')+"</a>";
+          roomList.appendChild(listItem);
+        }
+
+      }
+
+      getGroupChats();
+
+      document.getElementById("btn-login").onclick = login;
+      document.getElementById("btn-logout").onclick = logOut;
+      document.getElementById("btn-new-group-chat").onclick = newGroupChat;
+
+    </script>
+   
+  </div>
+</div>
+
+<div class="split right">
+  <div class="centered">
+    <p>CHAT</p>
+
+ <div id="chatHistory">
+   <ul id="historyList"></ul>
+ </div>
+
+ <input type="text" id="chatInput"/>
+ <input type="button" value="Send Message" id="sendButton"/>
+
+ <script>
+   // connect to Moralis server
+   Moralis.initialize("wsbYYkbHVHFT8JOOAg3xpv9QU2m1LbO5MO660wG8");
+   Moralis.serverURL = "https://gurlquv6hbfh.usemoralis.com:2053/server";
+
+   const queryString = window.location.search;
+   const params = new URLSearchParams(queryString);
+   const chatId = params.get('id')
+   console.log(chatId)
+
+   async function init(){
+     let query = new Moralis.Query('Message');
+     let subscription = await query.subscribe();
+
+     const historyList = document.getElementById("historyList");
+
+     subscription.on('create', (object) => {
+       if(object.get("group") == chatId){
+         var listItem = document.createElement('li');
+         listItem.innerHTML = object.get("sender") + " says:<br>"+object.get("text")+"<br>"
+         historyList.appendChild(listItem);
+       }
+     });
+   }
+
+
+
+   async function getHistory(){
+     const Message = Moralis.Object.extend("Message");
+     const query = new Moralis.Query(Message);
+     query.equalTo("group",chatId)
+     const results = await query.find();
+
+     const historyList = document.getElementById("historyList");
+
+     for (let i = 0; i < results.length; i++) {
+       const object = results[i];
+       var listItem = document.createElement('li');
+       listItem.innerHTML = object.get("sender") + " says:<br>"+object.get("text")+"<br>"
+       historyList.appendChild(listItem);
+     }
+
+   }
+
+   init()
+   getHistory()
+
+
+   async function sendMessage(){
+     let user = Moralis.User.current();
+     let message =  document.getElementById("chatInput").value;
+
+     if(message && message.length>0){
+       const Message = Moralis.Object.extend("Message");
+       const m = new Message();
+       m.set("sender",user.get("ethAddress"))
+       m.set("text",message)
+       m.set("group",chatId)
+
+       m.save()
+
+       console.log("sending " + message + " from " + user.get("ethAddress") + " in group " + chatId)
+     }
+   }
+
+   document.getElementById("sendButton").onclick = sendMessage;
+
+
+ </script>
+  </div>
+</div>
+     
+</body>
+</html> 
+
